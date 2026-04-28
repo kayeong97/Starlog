@@ -61,7 +61,47 @@ yarn-error.log*
 
 ### Local configuration and secrets ###
 **/*.local
-# application-secret.yml
-# application-secret.properties
-# application-local.properties
+*.properties
+*.yml
+*.yaml
+.env
+.env.*
+
+### Compiled and Packaged Files ###
+*.class
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+!gradle/wrapper/gradle-wrapper.jar
+
+### Certificates and Keys (Security) ###
+*.pem
+*.key
+*.keystore
+*.jks
+*.p12
+*.pkcs12
+
+### Local Database Files (H2, SQLite, etc.) ###
+*.sqlite
+*.db
+*.h2.db
+*.mv.db
+*.trace.db
+
+### Node.js / Frontend Builds (just in case) ###
+node_modules/
+dist/
+.npm/
+
+### IDE / OS Temps & Crash logs ###
+*.swp
+*~
+.tmp/
+/tmp/
+hs_err_pid*
+replay_pid*
 
