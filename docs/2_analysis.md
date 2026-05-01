@@ -1,6 +1,6 @@
 # 2. Analysis
 
-## starlog
+## Starlog
 
 ![Starlog Logo](https://github.com/kayeong97/picture_repo/blob/main/software_design/Starlog_Logo.PNG)
 | Item | Content |
@@ -8,6 +8,8 @@
 | Student No. | 22321627 |
 | Name | 김가영 |
 | E-mail | im_770@naver.ocm |
+
+> > > > > > > 887e9a338135ee10fa534eabfee7a6a6bbb0bd45
 
 ## Revision History
 
