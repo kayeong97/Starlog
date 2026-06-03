@@ -62,10 +62,13 @@ yarn-error.log*
 ### Local configuration and secrets ###
 **/*.local
 *.properties
+!gradle/wrapper/gradle-wrapper.properties
+!src/main/resources/application.properties
 *.yml
 *.yaml
 .env
 .env.*
+!.env.example
 
 ### Compiled and Packaged Files ###
 *.class
