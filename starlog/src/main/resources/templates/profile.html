@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>별지기 정보 | Starlog</title>
+    <link rel="stylesheet" href="/css/starlog.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <div th:replace="~{fragments :: topbar}"></div>
+      <div class="workspace">
+        <div th:replace="~{fragments :: sidebar('profile')}"></div>
+        <main class="content">
+          <h1>별지기 정보</h1>
+          <p>계정 정보와 지금까지 쌓아 올린 별의 흐름을 확인하세요.</p>
+
+          <div class="profile-layout">
+            <!-- 왼쪽 컬럼 -->
+            <div class="profile-left">
+              <!-- 프로필 카드 -->
+              <article class="profile-hero">
+                <span class="avatar large planet"></span>
+                <div>
+                  <h2 th:text="${user.nickname}">김별이</h2>
+                  <p th:text="${user.email}">user@example.com</p>
+                  <div class="tags">
+                    <span th:text="${user.levelName}">NEW EXPLORER</span>
+                    <span th:text="${constellation.name}">별자리</span>
+                    <span th:if="${user.birthDate}" th:text="${user.birthDate}">생년월일</span>
+                  </div>
+                </div>
+              </article>
+
+              <!-- 통계 미니 카드 -->
+              <div class="profile-mini-stats">
+                <article class="mini-stat">
+                  <span class="icon icon-book"></span>
+                  <strong th:text="${recordCount}">0</strong>
+                  <small>작성한 기록</small>
+                </article>
+                <article class="mini-stat">
+                  <span class="icon icon-spark"></span>
+                  <strong th:text="${user.currentStreak}">0</strong>
+                  <small>연속 기록 (일)</small>
+                </article>
+              </div>
+
+              <!-- 최근 기록 -->
+              <article class="profile-records-card">
+                <h2>최근 기록</h2>
+                <div class="record-list slim" th:if="${!recentRecords.isEmpty()}">
+                  <article th:each="record : ${recentRecords}">
+                    <span class="record-date" th:text="${record.recordDate}">2024-05-24</span>
+                    <strong th:text="${record.mood.displayName}">좋아요</strong>
+                    <p th:text="${record.content}">기록 내용</p>
+                  </article>
+                </div>
+                <p th:if="${recentRecords.isEmpty()}" style="color: var(--muted); margin: 0;">
+                  아직 작성한 기록이 없습니다.
+                </p>
+              </article>
+            </div>
+
+            <!-- 오른쪽 컬럼 -->
+            <div class="profile-right">
+              <!-- 별 수집 현황 -->
+              <article class="star-feature-card">
+                <div class="star-feature-icon">⭐</div>
+                <strong th:text="${user.starCount}">0</strong>
+                <p>총 수집한 별</p>
+              </article>
+
+              <!-- 별자리 진행 현황 -->
+              <article class="constellation-progress-card">
+                <h2 th:text="${constellation.name}">별자리</h2>
+                <div class="mini-zodiac">
+                  <span
+                    th:each="point, stat : ${constellation.points}"
+                    th:classappend="${stat.index < constellation.filledCount} ? 'filled'"
+                    th:style="'left:' + ${point.x} + '%; top:' + ${point.y} + '%'"
+                  ></span>
+                </div>
+                <div class="constellation-percent">
+                  <span th:text="${constellation.percent} + '%'">0%</span>
+                  <small>완성도</small>
+                </div>
+                <p style="color: var(--muted); font-size: 13px; margin: 10px 0 0; line-height: 1.6;">
+                  기록을 남길수록 별자리가 채워집니다.
+                </p>
+              </article>
+            </div>
+          </div>
+
+          <h2 class="section-title">환경 설정</h2>
+          <section class="settings-row">
+            <a href="#">
+              <span class="icon icon-user"></span>
+              <strong>계정 및 보안</strong>
+              <small>비밀번호와 이메일은 안전하게 관리됩니다.</small>
+            </a>
+            <a href="#">
+              <span class="icon icon-book"></span>
+              <strong>도움말</strong>
+              <small>목표, 기록, 별자리 사용법</small>
+            </a>
+            <form action="/logout" method="post" class="logout-form">
+              <button class="danger" type="submit">
+                <span class="icon icon-arrow"></span>
+                <strong>로그아웃</strong>
+                <small>현재 기기에서 접속 종료</small>
+              </button>
+            </form>
+          </section>
+        </main>
+      </div>
+      <div th:replace="~{fragments :: footer}"></div>
+    </div>
+  </body>
+</html>

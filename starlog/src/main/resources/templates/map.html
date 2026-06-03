@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>나의 우주 지도 | Starlog</title>
+    <link rel="stylesheet" href="/css/starlog.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <div th:replace="~{fragments :: topbar}"></div>
+      <div class="workspace">
+        <div th:replace="~{fragments :: sidebar('map')}"></div>
+        <main class="content calendar-layout">
+          <section>
+            <h1>나의 우주 지도</h1>
+            <p
+              th:text="${monthLabel} + ', 당신의 기록이 별자리로 쌓이고 있습니다.'"
+            >
+              이번 달 기록
+            </p>
+
+            <!-- 달력 -->
+            <div class="calendar-card">
+              <div class="calendar-head">
+                <span>일</span><span>월</span><span>화</span><span>수</span
+                ><span>목</span><span>금</span><span>토</span>
+              </div>
+              <div class="calendar-grid">
+                <span
+                  th:each="cell : ${calendarCells}"
+                  th:class="${cell == null ? 'muted' : (recordedDays.contains(cell) ? (cell == todayDay ? 'event selected' : 'event') : (cell == todayDay ? 'selected' : ''))}"
+                  th:text="${cell != null ? cell : ''}"
+                >
+                </span>
+              </div>
+            </div>
+
+            <!-- 이번 달 기록 목록 -->
+            <h2 class="section-title" th:if="${!records.isEmpty()}">
+              이번 달 기록
+            </h2>
+            <div class="record-list" th:if="${!records.isEmpty()}">
+              <article th:each="record : ${records}">
+                <span class="record-date" th:text="${record.recordDate}"
+                  >2024-05-24</span
+                >
+                <strong th:text="${record.mood.displayName}">좋아요</strong>
+                <p th:text="${record.content}">기록 내용</p>
+              </article>
+            </div>
+            <div class="empty-state compact" th:if="${records.isEmpty()}">
+              <span class="icon icon-star"></span>
+              <h2>이번 달 기록이 아직 없어요</h2>
+              <p>오늘의 기록을 남기면 이곳에 당신의 별이 채워집니다.</p>
+            </div>
+          </section>
+          <aside class="right-stack">
+            <article class="stat-card">
+              <h2>이달의 통계</h2>
+              <p>생성된 별</p>
+              <strong th:text="${monthRecordCount} + '개'">0개</strong>
+              <p>총 보유 별</p>
+              <strong th:text="${user.starCount} + '개'">0개</strong>
+            </article>
+            <article class="milestone-card">
+              <h2 th:text="${constellation.name}">별자리</h2>
+              <div class="mini-zodiac">
+                <span
+                  th:each="point, stat : ${constellation.points}"
+                  th:classappend="${stat.index < constellation.filledCount} ? 'filled'"
+                  th:style="'left:' + ${point.x} + '%; top:' + ${point.y} + '%'"
+                ></span>
+              </div>
+              <p>기록을 남길수록 실제 별자리 형태가 채워집니다.</p>
+            </article>
+            <a class="button outline wide" href="/record"
+              ><span class="icon icon-plus"></span> 기록 추가하기</a
+            >
+          </aside>
+        </main>
+      </div>
+      <div th:replace="~{fragments :: footer}"></div>
+    </div>
+  </body>
+</html>
