@@ -39,6 +39,9 @@ public class Routine {
 	@Column(nullable = false)
 	private boolean active = true;
 
+	@Column(nullable = false, length = 20)
+	private String frequency = "DAILY";
+
 	@Column(name = "created_at", insertable = false, updatable = false)
 	private LocalDateTime createdAt;
 
@@ -51,6 +54,13 @@ public class Routine {
 		this.displayOrder = displayOrder;
 	}
 
+	public Routine(StarlogUser user, String title, int displayOrder, String frequency) {
+		this.user = user;
+		this.title = title;
+		this.displayOrder = displayOrder;
+		this.frequency = frequency != null ? frequency : "DAILY";
+	}
+
 	public Long getId() { return id; }
 	public StarlogUser getUser() { return user; }
 	public Goal getGoal() { return goal; }
@@ -58,7 +68,17 @@ public class Routine {
 	public String getTitle() { return title; }
 	public int getDisplayOrder() { return displayOrder; }
 	public boolean isActive() { return active; }
+	public String getFrequency() { return frequency; }
 	public LocalDateTime getCreatedAt() { return createdAt; }
 	public void setGoal(Goal goal) { this.goal = goal; }
 	public void setActive(boolean active) { this.active = active; }
+	public void update(String title, int displayOrder) {
+		this.title = title;
+		this.displayOrder = displayOrder;
+	}
+	public void update(String title, int displayOrder, String frequency) {
+		this.title = title;
+		this.displayOrder = displayOrder;
+		this.frequency = frequency != null ? frequency : "DAILY";
+	}
 }

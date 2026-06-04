@@ -4,8 +4,10 @@ import jakarta.servlet.http.HttpSession;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -20,6 +22,7 @@ import starlog.com.starlog.domain.Goal;
 import starlog.com.starlog.domain.Mood;
 import starlog.com.starlog.domain.StarlogUser;
 import starlog.com.starlog.domain.UserRole;
+import starlog.com.starlog.repository.UserFeedbackRepository;
 import starlog.com.starlog.service.ConstellationService;
 import starlog.com.starlog.service.DailyRecordService;
 import starlog.com.starlog.service.GoalService;
@@ -34,14 +37,17 @@ public class HomeController {
 	private final DailyRecordService dailyRecordService;
 	private final ConstellationService constellationService;
 	private final RoutineService routineService;
+	private final UserFeedbackRepository feedbackRepository;
 
 	public HomeController(UserService userService, GoalService goalService, DailyRecordService dailyRecordService,
-			ConstellationService constellationService, RoutineService routineService) {
+			ConstellationService constellationService, RoutineService routineService,
+			UserFeedbackRepository feedbackRepository) {
 		this.userService = userService;
 		this.goalService = goalService;
 		this.dailyRecordService = dailyRecordService;
 		this.constellationService = constellationService;
 		this.routineService = routineService;
+		this.feedbackRepository = feedbackRepository;
 	}
 
 	@GetMapping("/")
@@ -107,6 +113,7 @@ public class HomeController {
 		if (user == null) {
 			return "redirect:/login";
 		}
+		goalService.recalculateAllForUser(user.getId());
 		fillUserModel(model, user);
 		model.addAttribute("goals", goalService.recentGoals(user.getId()));
 		model.addAttribute("recordCount", dailyRecordService.countByUser(user.getId()));
@@ -129,6 +136,7 @@ public class HomeController {
 		if (user == null) {
 			return "redirect:/login";
 		}
+		goalService.recalculateAllForUser(user.getId());
 		fillUserModel(model, user);
 		model.addAttribute("goals", goalService.findAllByUser(user.getId()));
 		model.addAttribute("editGoalRoutines", List.of());
@@ -148,6 +156,7 @@ public class HomeController {
 			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate targetDate,
 			@RequestParam(required = false, defaultValue = "") String description,
 			@RequestParam(required = false) List<String> routineNames,
+			@RequestParam(required = false) List<String> routineFreqs,
 			HttpSession session,
 			Model model
 	) {
@@ -157,7 +166,7 @@ public class HomeController {
 		}
 		try {
 			Goal goal = goalService.create(user.get(), title, category, targetDate, description);
-			routineService.replaceGoalRoutines(user.get().getId(), goal.getId(), routineNames);
+			routineService.replaceGoalRoutines(user.get().getId(), goal.getId(), routineNames, routineFreqs);
 			return "redirect:/goals";
 		} catch (RuntimeException ex) {
 			model.addAttribute("errorMessage", "목표를 저장하지 못했습니다: " + ex.getMessage());
@@ -176,6 +185,7 @@ public class HomeController {
 			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate targetDate,
 			@RequestParam(required = false, defaultValue = "") String description,
 			@RequestParam(required = false) List<String> routineNames,
+			@RequestParam(required = false) List<String> routineFreqs,
 			HttpSession session,
 			Model model
 	) {
@@ -185,7 +195,7 @@ public class HomeController {
 		}
 		try {
 			Goal goal = goalService.update(id, user.get().getId(), title, category, targetDate, description);
-			routineService.replaceGoalRoutines(user.get().getId(), goal.getId(), routineNames);
+			routineService.replaceGoalRoutines(user.get().getId(), goal.getId(), routineNames, routineFreqs);
 			goalService.recalculateAllForUser(user.get().getId());
 			return "redirect:/goals";
 		} catch (RuntimeException ex) {
@@ -201,41 +211,60 @@ public class HomeController {
 	}
 
 	@GetMapping("/map")
-	public String map(HttpSession session, Model model) {
+	public String map(
+			@RequestParam(required = false) Integer year,
+			@RequestParam(required = false) Integer month,
+			HttpSession session,
+			Model model
+	) {
 		StarlogUser user = requireUser(session);
 		if (user == null) {
 			return "redirect:/login";
 		}
 		LocalDate today = LocalDate.now();
+		YearMonth ym = (year != null && month != null) ? YearMonth.of(year, month) : YearMonth.now();
+		LocalDate monthStart = ym.atDay(1);
 		fillUserModel(model, user);
 
-		String monthLabel = today.getYear() + "년 " + today.getMonthValue() + "월";
+		String monthLabel = ym.getYear() + "년 " + ym.getMonthValue() + "월";
 		model.addAttribute("monthLabel", monthLabel);
-		model.addAttribute("monthRecordCount", dailyRecordService.countByUserAndMonth(user.getId(), today));
+		model.addAttribute("monthRecordCount", dailyRecordService.countByUserAndMonth(user.getId(), monthStart));
 
-		List<DailyRecord> records = dailyRecordService.recordsInMonth(user.getId(), today);
+		List<DailyRecord> records = dailyRecordService.recordsInMonth(user.getId(), monthStart);
 		model.addAttribute("records", records);
 
-		LocalDate firstDay = today.withDayOfMonth(1);
-		int leadingBlanks = firstDay.getDayOfWeek().getValue() % 7;
-		int daysInMonth = today.lengthOfMonth();
+		int leadingBlanks = monthStart.getDayOfWeek().getValue() % 7;
+		int daysInMonth = ym.lengthOfMonth();
 
 		Set<Integer> recordedDays = new HashSet<>();
+		Map<Integer, DailyRecord> recordsByDay = new HashMap<>();
+		Map<Integer, Map<String, String>> recordsForJs = new HashMap<>();
 		for (DailyRecord r : records) {
-			recordedDays.add(r.getRecordDate().getDayOfMonth());
+			int day = r.getRecordDate().getDayOfMonth();
+			recordedDays.add(day);
+			recordsByDay.put(day, r);
+			Map<String, String> entry = new HashMap<>();
+			entry.put("date", r.getRecordDate().toString());
+			entry.put("mood", r.getMood().getDisplayName());
+			entry.put("content", r.getContent());
+			recordsForJs.put(day, entry);
 		}
 
 		List<Integer> calendarCells = new ArrayList<>();
-		for (int i = 0; i < leadingBlanks; i++) {
-			calendarCells.add(null);
-		}
-		for (int d = 1; d <= daysInMonth; d++) {
-			calendarCells.add(d);
-		}
+		for (int i = 0; i < leadingBlanks; i++) calendarCells.add(null);
+		for (int d = 1; d <= daysInMonth; d++) calendarCells.add(d);
 
+		boolean isCurrent = ym.equals(YearMonth.now());
 		model.addAttribute("calendarCells", calendarCells);
 		model.addAttribute("recordedDays", recordedDays);
-		model.addAttribute("todayDay", today.getDayOfMonth());
+		model.addAttribute("recordsByDay", recordsByDay);
+		model.addAttribute("recordsForJs", recordsForJs);
+		model.addAttribute("todayDay", isCurrent ? today.getDayOfMonth() : -1);
+
+		YearMonth prev = ym.minusMonths(1);
+		YearMonth next = ym.plusMonths(1);
+		model.addAttribute("prevMonthUrl", "/map?year=" + prev.getYear() + "&month=" + prev.getMonthValue());
+		model.addAttribute("nextMonthUrl", "/map?year=" + next.getYear() + "&month=" + next.getMonthValue());
 
 		return "map";
 	}
@@ -306,6 +335,9 @@ public class HomeController {
 		model.addAttribute("allUsers", userService.findAll());
 		model.addAttribute("totalUsers", userService.count());
 		model.addAttribute("totalRecords", dailyRecordService.countAll());
+		model.addAttribute("feedbacks", feedbackRepository.findAll(
+				org.springframework.data.domain.Sort.by(
+						org.springframework.data.domain.Sort.Direction.DESC, "createdAt")));
 		return "admin";
 	}
 

@@ -8,6 +8,6 @@ import starlog.com.starlog.domain.RoutineCheck;
 public interface RoutineCheckRepository extends JpaRepository<RoutineCheck, Long> {
 	boolean existsByRoutineIdAndRecordId(Long routineId, Long recordId);
 
-	@Query("SELECT COUNT(rc) FROM RoutineCheck rc WHERE rc.routine.goal.id = :goalId AND rc.checked = true")
+	@Query("SELECT COUNT(rc) FROM RoutineCheck rc WHERE rc.routine.goal.id = :goalId AND rc.routine.active = true AND rc.checked = true")
 	long countCheckedByGoalId(@Param("goalId") Long goalId);
 }

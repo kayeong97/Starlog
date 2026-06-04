@@ -27,7 +27,9 @@
                   <div class="tags">
                     <span th:text="${user.levelName}">NEW EXPLORER</span>
                     <span th:text="${constellation.name}">별자리</span>
-                    <span th:if="${user.birthDate}" th:text="${user.birthDate}">생년월일</span>
+                    <span th:if="${user.birthDate}" th:text="${user.birthDate}"
+                      >생년월일</span
+                    >
                   </div>
                 </div>
               </article>
@@ -49,14 +51,22 @@
               <!-- 최근 기록 -->
               <article class="profile-records-card">
                 <h2>최근 기록</h2>
-                <div class="record-list slim" th:if="${!recentRecords.isEmpty()}">
+                <div
+                  class="record-list slim"
+                  th:if="${!recentRecords.isEmpty()}"
+                >
                   <article th:each="record : ${recentRecords}">
-                    <span class="record-date" th:text="${record.recordDate}">2024-05-24</span>
+                    <span class="record-date" th:text="${record.recordDate}"
+                      >2024-05-24</span
+                    >
                     <strong th:text="${record.mood.displayName}">좋아요</strong>
                     <p th:text="${record.content}">기록 내용</p>
                   </article>
                 </div>
-                <p th:if="${recentRecords.isEmpty()}" style="color: var(--muted); margin: 0;">
+                <p
+                  th:if="${recentRecords.isEmpty()}"
+                  style="color: var(--muted); margin: 0"
+                >
                   아직 작성한 기록이 없습니다.
                 </p>
               </article>
@@ -85,7 +95,14 @@
                   <span th:text="${constellation.percent} + '%'">0%</span>
                   <small>완성도</small>
                 </div>
-                <p style="color: var(--muted); font-size: 13px; margin: 10px 0 0; line-height: 1.6;">
+                <p
+                  style="
+                    color: var(--muted);
+                    font-size: 13px;
+                    margin: 10px 0 0;
+                    line-height: 1.6;
+                  "
+                >
                   기록을 남길수록 별자리가 채워집니다.
                 </p>
               </article>

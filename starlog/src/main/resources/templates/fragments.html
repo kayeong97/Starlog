@@ -1,52 +1,81 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
-<body>
-<header th:fragment="topbar" class="topbar">
-	<button class="sidebar-toggle" type="button" aria-label="사이드바 열고 닫기">
-		<span></span><span></span><span></span>
-	</button>
-	<a class="logo" href="/">
-		<img src="/images/Starlog_Logo.PNG" alt="Starlog" class="logo-img" />
-	</a>
-	<div class="top-actions">
-		<a class="top-icon" href="/record" aria-label="기록 추가"><span class="icon icon-plus"></span></a>
-		<a class="top-icon" href="/profile" aria-label="프로필"><span class="icon icon-user"></span></a>
-	</div>
-	<script defer src="/js/starlog.js"></script>
-</header>
+  <body>
+    <header th:fragment="topbar" class="topbar">
+      <button
+        class="sidebar-toggle"
+        type="button"
+        aria-label="사이드바 열고 닫기"
+      >
+        <span></span><span></span><span></span>
+      </button>
+      <a class="logo" href="/">
+        <img src="/images/Starlog_Logo.PNG" alt="Starlog" class="logo-img" />
+      </a>
+      <div class="top-actions">
+        <a class="top-icon" href="/record" aria-label="기록 추가"
+          ><span class="icon icon-plus"></span
+        ></a>
+        <a class="top-icon" href="/profile" aria-label="프로필"
+          ><span class="icon icon-user"></span
+        ></a>
+      </div>
+      <script defer src="/js/starlog.js"></script>
+    </header>
 
-<aside th:fragment="sidebar(active)" class="sidebar">
-	<div>
-		<a class="sidebar-brand" href="/dashboard">
-			<span class="avatar planet"></span>
-			<span>
-				<strong th:text="${user != null ? user.nickname : 'Starlog'}">Starlog</strong>
-				<small>나만의 은하계 기록</small>
-			</span>
-		</a>
-		<nav class="side-nav">
-			<a href="/dashboard" th:classappend="${active == 'dashboard'} ? 'active'"><span class="icon icon-dashboard"></span> 대시보드</a>
-			<a href="/goals" th:classappend="${active == 'goals'} ? 'active'"><span class="icon icon-rocket"></span> 목표 관리</a>
-			<a href="/map" th:classappend="${active == 'map'} ? 'active'"><span class="icon icon-book"></span> 별자리 보관함</a>
-			<a href="/profile" th:classappend="${active == 'profile'} ? 'active'"><span class="icon icon-user"></span> 별지기 정보</a>
-		</nav>
-	</div>
-	<div class="profile-chip">
-		<span class="avatar"></span>
-		<span>
-			<strong th:text="${user != null ? user.levelName : 'GUEST EXPLORER'}">NEW EXPLORER</strong>
-			<small>나의 탐험 등급</small>
-		</span>
-	</div>
-</aside>
+    <aside th:fragment="sidebar(active)" class="sidebar">
+      <div>
+        <a class="sidebar-brand" href="/dashboard">
+          <span class="avatar planet"></span>
+          <span>
+            <strong th:text="${user != null ? user.nickname : 'Starlog'}"
+              >Starlog</strong
+            >
+            <small>나만의 은하계 기록</small>
+          </span>
+        </a>
+        <nav class="side-nav">
+          <a
+            href="/dashboard"
+            th:classappend="${active == 'dashboard'} ? 'active'"
+            ><span class="icon icon-dashboard"></span> 대시보드</a
+          >
+          <a href="/goals" th:classappend="${active == 'goals'} ? 'active'"
+            ><span class="icon icon-rocket"></span> 목표 관리</a
+          >
+          <a href="/map" th:classappend="${active == 'map'} ? 'active'"
+            ><span class="icon icon-book"></span> 별자리 보관함</a
+          >
+          <a href="/profile" th:classappend="${active == 'profile'} ? 'active'"
+            ><span class="icon icon-user"></span> 별지기 정보</a
+          >
+          <a
+            href="/admin"
+            th:if="${user != null && user.role.name() == 'ADMIN'}"
+            th:classappend="${active == 'admin'} ? 'active'"
+            class="admin-nav-link"
+            ><span class="icon icon-star"></span> 관리 페이지</a
+          >
+        </nav>
+      </div>
+      <div class="profile-chip">
+        <span class="avatar"></span>
+        <span>
+          <strong th:text="${user != null ? user.levelName : 'GUEST EXPLORER'}"
+            >NEW EXPLORER</strong
+          >
+          <small>나의 탐험 등급</small>
+        </span>
+      </div>
+    </aside>
 
-<footer th:fragment="footer" class="footer">
-	<nav>
-		<a href="#">개인정보처리방침</a>
-		<a href="#">이용약관</a>
-		<a href="#">도움말</a>
-	</nav>
-	<p>© 2024 Starlog.</p>
-</footer>
-</body>
+    <footer th:fragment="footer" class="footer">
+      <nav>
+        <a href="#">개인정보처리방침</a>
+        <a href="#">이용약관</a>
+        <a href="#">도움말</a>
+      </nav>
+      <p>© 2024 Starlog.</p>
+    </footer>
+  </body>
 </html>

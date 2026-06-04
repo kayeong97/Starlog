@@ -68,14 +68,18 @@ CREATE TABLE IF NOT EXISTS record_tags (
 CREATE TABLE IF NOT EXISTS routines (
 	id BIGINT NOT NULL AUTO_INCREMENT,
 	user_id BIGINT NOT NULL,
+	goal_id BIGINT NULL,
 	title VARCHAR(100) NOT NULL,
+	frequency VARCHAR(20) NOT NULL DEFAULT 'DAILY',
 	display_order INT NOT NULL DEFAULT 0,
 	active BOOLEAN NOT NULL DEFAULT TRUE,
 	created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	PRIMARY KEY (id),
 	UNIQUE KEY uk_routines_user_title (user_id, title),
 	KEY idx_routines_user_id (user_id),
-	CONSTRAINT fk_routines_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+	KEY idx_routines_goal_id (goal_id),
+	CONSTRAINT fk_routines_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
+	CONSTRAINT fk_routines_goal FOREIGN KEY (goal_id) REFERENCES goals (id) ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS routine_checks (

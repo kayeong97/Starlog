@@ -1,79 +1,134 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
-<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>관리자 | Starlog</title>
-	<link rel="stylesheet" href="/css/starlog.css">
-</head>
-<body>
-<div class="app-shell">
-	<div th:replace="~{fragments :: topbar}"></div>
-	<div class="workspace admin">
-		<div th:replace="~{fragments :: sidebar('admin')}"></div>
-		<main class="content">
-			<div class="admin-top">
-				<div>
-					<h1>시스템 관리 센터</h1>
-					<p>사용자, 기록, 피드백 데이터를 안전하게 관리하는 공간입니다.</p>
-				</div>
-				<input placeholder="회원 검색 (이름, 이메일)" id="userSearch" oninput="filterTable(this.value)">
-			</div>
-			<section class="admin-grid">
-				<article class="feedback-card">
-					<h2>운영 체크리스트</h2>
-					<div><strong>DB 연결</strong><p>MySQL 계정과 `.env` 값이 일치하는지 확인하세요.</p></div>
-					<div><strong>보안</strong><p>운영 환경에서는 HTTPS와 세션 보안 설정을 추가해야 합니다.</p></div>
-				</article>
-				<article class="growth-card">
-					<small>LIVE</small>
-					<h2>서비스 현황</h2>
-					<p>총 회원 <strong th:text="${totalUsers}">0</strong>명 · 총 기록 <strong th:text="${totalRecords}">0</strong>건</p>
-					<strong>Starlog</strong>
-					<span>SERVICE MODE</span>
-				</article>
-				<article class="table-card">
-					<h2>회원 목록</h2>
-					<table id="userTable">
-						<thead>
-							<tr>
-								<th>ID</th>
-								<th>닉네임</th>
-								<th>아이디</th>
-								<th>이메일</th>
-								<th>레벨</th>
-								<th>수집한 별</th>
-								<th>권한</th>
-							</tr>
-						</thead>
-						<tbody>
-							<tr th:each="u : ${allUsers}" class="user-row">
-								<td th:text="${u.id}">1</td>
-								<td th:text="${u.nickname}">닉네임</td>
-								<td th:text="${u.username}">아이디</td>
-								<td th:text="${u.email}">이메일</td>
-								<td th:text="${u.levelName}">NEW EXPLORER</td>
-								<td th:text="${u.starCount}">0</td>
-								<td th:text="${u.role}">USER</td>
-							</tr>
-							<tr th:if="${allUsers.isEmpty()}">
-								<td colspan="7" style="text-align:center; color: var(--muted);">가입된 회원이 없습니다.</td>
-							</tr>
-						</tbody>
-					</table>
-				</article>
-			</section>
-		</main>
-	</div>
-	<div th:replace="~{fragments :: footer}"></div>
-</div>
-<script>
-function filterTable(q) {
-	const rows = document.querySelectorAll('#userTable .user-row');
-	rows.forEach(row => {
-		row.style.display = row.textContent.toLowerCase().includes(q.toLowerCase()) ? '' : 'none';
-	});
-}
-</script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>관리자 | Starlog</title>
+    <link rel="stylesheet" href="/css/starlog.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <div th:replace="~{fragments :: topbar}"></div>
+      <div class="workspace admin">
+        <div th:replace="~{fragments :: sidebar('admin')}"></div>
+        <main class="content">
+          <div class="admin-top">
+            <div>
+              <h1>시스템 관리 센터</h1>
+              <p>사용자, 기록, 피드백 데이터를 안전하게 관리하는 공간입니다.</p>
+            </div>
+            <input
+              placeholder="회원 검색 (이름, 이메일)"
+              id="userSearch"
+              oninput="filterTable(this.value)"
+            />
+          </div>
+          <section class="admin-grid">
+            <article class="feedback-card">
+              <h2>운영 체크리스트</h2>
+              <div>
+                <strong>DB 연결</strong>
+                <p>MySQL 계정과 `.env` 값이 일치하는지 확인하세요.</p>
+              </div>
+              <div>
+                <strong>보안</strong>
+                <p>운영 환경에서는 HTTPS와 세션 보안 설정을 추가해야 합니다.</p>
+              </div>
+            </article>
+            <article class="growth-card">
+              <small>LIVE</small>
+              <h2>서비스 현황</h2>
+              <p>
+                총 회원 <strong th:text="${totalUsers}">0</strong>명 · 총 기록
+                <strong th:text="${totalRecords}">0</strong>건
+              </p>
+              <strong>Starlog</strong>
+              <span>SERVICE MODE</span>
+            </article>
+            <article class="table-card">
+              <h2>회원 목록</h2>
+              <table id="userTable">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>닉네임</th>
+                    <th>아이디</th>
+                    <th>이메일</th>
+                    <th>레벨</th>
+                    <th>수집한 별</th>
+                    <th>권한</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr th:each="u : ${allUsers}" class="user-row">
+                    <td th:text="${u.id}">1</td>
+                    <td th:text="${u.nickname}">닉네임</td>
+                    <td th:text="${u.username}">아이디</td>
+                    <td th:text="${u.email}">이메일</td>
+                    <td th:text="${u.levelName}">NEW EXPLORER</td>
+                    <td th:text="${u.starCount}">0</td>
+                    <td th:text="${u.role}">USER</td>
+                  </tr>
+                  <tr th:if="${allUsers.isEmpty()}">
+                    <td
+                      colspan="7"
+                      style="text-align: center; color: var(--muted)"
+                    >
+                      가입된 회원이 없습니다.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </article>
+          </section>
+
+          <!-- 피드백 섹션 -->
+          <section class="admin-feedback-section">
+            <h2>사용자 피드백</h2>
+            <div
+              th:if="${feedbacks.isEmpty()}"
+              style="color: var(--muted); padding: 24px 0"
+            >
+              등록된 피드백이 없습니다.
+            </div>
+            <div class="feedback-list" th:if="${!feedbacks.isEmpty()}">
+              <article class="feedback-item" th:each="fb : ${feedbacks}">
+                <div class="feedback-item-header">
+                  <span class="feedback-author" th:text="${fb.authorName}"
+                    >작성자</span
+                  >
+                  <span
+                    class="feedback-category"
+                    th:text="${fb.category == 'FEATURE' ? '기능 요청' : (fb.category == 'BUG' ? '버그 신고' : '일반')}"
+                    >일반</span
+                  >
+                  <span
+                    class="feedback-date"
+                    th:text="${#temporals.format(fb.createdAt, 'yyyy-MM-dd HH:mm')}"
+                    >날짜</span
+                  >
+                </div>
+                <p class="feedback-message" th:text="${fb.message}">
+                  피드백 내용
+                </p>
+              </article>
+            </div>
+          </section>
+        </main>
+      </div>
+      <div th:replace="~{fragments :: footer}"></div>
+    </div>
+    <script>
+      function filterTable(q) {
+        const rows = document.querySelectorAll("#userTable .user-row");
+        rows.forEach((row) => {
+          row.style.display = row.textContent
+            .toLowerCase()
+            .includes(q.toLowerCase())
+            ? ""
+            : "none";
+        });
+      }
+    </script>
+  </body>
 </html>

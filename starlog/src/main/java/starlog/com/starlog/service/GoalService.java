@@ -74,10 +74,23 @@ public class GoalService {
 			LocalDate createdDate = goal.getCreatedAt() != null
 					? goal.getCreatedAt().toLocalDate()
 					: LocalDate.now();
-			long totalDays = Math.max(1, ChronoUnit.DAYS.between(createdDate, LocalDate.now()) + 1);
-			long totalExpected = (long) linked.size() * totalDays;
-			long totalChecked = routineCheckRepository.countCheckedByGoalId(goal.getId());
+			// 전체 기간 기준 (마감일 없으면 90일)
+			LocalDate targetDate = goal.getTargetDate();
+			LocalDate endDate = targetDate != null ? targetDate : createdDate.plusDays(89);
+			long totalDays = Math.max(1, ChronoUnit.DAYS.between(createdDate, endDate) + 1);
 
+			long totalExpected = 0;
+			for (Routine r : linked) {
+				String freq = r.getFrequency() != null ? r.getFrequency() : "DAILY";
+				totalExpected += switch (freq) {
+					case "EVERY_OTHER" -> Math.max(1, (totalDays + 1) / 2);
+					case "WEEKLY_3"    -> Math.max(1, Math.round(totalDays * 3.0 / 7));
+					case "FOCUS"       -> Math.max(1, Math.round(totalDays * 0.3));
+					default            -> totalDays;
+				};
+			}
+
+			long totalChecked = routineCheckRepository.countCheckedByGoalId(goal.getId());
 			int percent = (int) Math.min(100, Math.round(totalChecked * 100.0 / totalExpected));
 			goal.setProgressPercent(percent);
 		}

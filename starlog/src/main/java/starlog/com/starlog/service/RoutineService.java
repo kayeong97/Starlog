@@ -42,20 +42,30 @@ public class RoutineService {
 	}
 
 	@Transactional
-	public void replaceGoalRoutines(Long userId, Long goalId, List<String> names) {
+	public void replaceGoalRoutines(Long userId, Long goalId, List<String> names, List<String> freqs) {
 		StarlogUser user = userRepository.findById(userId).orElseThrow();
 		Goal goal = goalRepository.findById(goalId).orElseThrow();
 
-		routineRepository.deleteAll(routineRepository.findByGoalId(goalId));
+		List<Routine> existing = routineRepository.findByGoalId(goalId);
+		List<String> cleaned = names == null ? List.of() :
+				names.stream().map(String::trim).filter(s -> !s.isEmpty()).toList();
 
-		if (names == null) return;
-		for (int i = 0; i < names.size(); i++) {
-			String name = names.get(i).trim();
-			if (!name.isEmpty()) {
-				Routine r = new Routine(user, name, i);
-				r.setGoal(goal);
-				routineRepository.save(r);
+		// 기존 루틴 업데이트, 줄어든 만큼 삭제
+		for (int i = 0; i < existing.size(); i++) {
+			if (i < cleaned.size()) {
+				String freq = (freqs != null && i < freqs.size()) ? freqs.get(i) : "DAILY";
+				existing.get(i).update(cleaned.get(i), i, freq);
+			} else {
+				routineRepository.delete(existing.get(i));
 			}
+		}
+
+		// 새 루틴 추가
+		for (int i = existing.size(); i < cleaned.size(); i++) {
+			String freq = (freqs != null && i < freqs.size()) ? freqs.get(i) : "DAILY";
+			Routine r = new Routine(user, cleaned.get(i), i, freq);
+			r.setGoal(goal);
+			routineRepository.save(r);
 		}
 	}
 

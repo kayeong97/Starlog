@@ -82,7 +82,7 @@
             </div>
           </section>
 
-          <!-- 루틴 체크 (DB에 등록된 루틴이 있을 때만 표시) -->
+          <!-- 루틴 체크 -->
           <section class="routine-card" th:if="${!routines.isEmpty()}">
             <h2>데일리 루틴 체크</h2>
             <label th:each="routine : ${routines}">

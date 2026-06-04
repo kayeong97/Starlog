@@ -1,211 +1,458 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
-<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>목표 관리 | Starlog</title>
-	<link rel="stylesheet" href="/css/starlog.css">
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-</head>
-<body>
-<div class="app-shell">
-	<div th:replace="~{fragments :: topbar}"></div>
-	<div class="workspace">
-		<div th:replace="~{fragments :: sidebar('goals')}"></div>
-		<main class="content">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>목표 관리 | Starlog</title>
+    <link rel="stylesheet" href="/css/starlog.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
+    />
+  </head>
+  <body>
+    <div class="app-shell">
+      <div th:replace="~{fragments :: topbar}"></div>
+      <div class="workspace">
+        <div th:replace="~{fragments :: sidebar('goals')}"></div>
+        <main class="content">
+          <!-- 기존 목표 목록 -->
+          <section th:if="${!goals.isEmpty()}">
+            <div class="page-title">
+              <h1>나의 목표들</h1>
+              <p>
+                지금까지 설정한 꿈들을 확인하고 수정하거나 새로운 꿈을
+                추가해보세요.
+              </p>
+            </div>
+            <div class="goal-grid">
+              <article class="goal-card" th:each="goal : ${goals}">
+                <small th:text="${goal.category}">STUDY</small>
+                <a
+                  th:href="@{/goals(editId=${goal.id})}"
+                  class="goal-card-edit"
+                  title="수정"
+                  >✎ 수정</a
+                >
+                <h3 th:text="${goal.title}">목표 이름</h3>
+                <p
+                  th:text="${goal.description != null && !goal.description.isBlank() ? goal.description : '아직 상세 기록이 없습니다.'}"
+                >
+                  목표 설명
+                </p>
+                <meter
+                  min="0"
+                  max="100"
+                  th:value="${goal.progressPercent}"
+                ></meter>
+                <div class="goal-card-footer">
+                  <span th:text="${goal.progressPercent} + '% 진행'"
+                    >0% 진행</span
+                  >
+                  <span
+                    class="goal-status"
+                    th:text="${goal.status == 'ACTIVE' ? '진행 중' : (goal.status == 'COMPLETED' ? '완료' : '보관')}"
+                    >진행 중</span
+                  >
+                </div>
+              </article>
+            </div>
+          </section>
 
-			<!-- 기존 목표 목록 -->
-			<section th:if="${!goals.isEmpty()}">
-				<div class="page-title">
-					<h1>나의 목표들</h1>
-					<p>지금까지 설정한 꿈들을 확인하고 수정하거나 새로운 꿈을 추가해보세요.</p>
-				</div>
-				<div class="goal-grid">
-					<article class="goal-card" th:each="goal : ${goals}">
-						<small th:text="${goal.category}">STUDY</small>
-						<a th:href="@{/goals(editId=${goal.id})}" class="goal-card-edit" title="수정">✎ 수정</a>
-						<h3 th:text="${goal.title}">목표 이름</h3>
-						<p th:text="${goal.description != null && !goal.description.isBlank() ? goal.description : '아직 상세 기록이 없습니다.'}">목표 설명</p>
-						<meter min="0" max="100" th:value="${goal.progressPercent}"></meter>
-						<div class="goal-card-footer">
-							<span th:text="${goal.progressPercent} + '% 진행'">0% 진행</span>
-							<span class="goal-status" th:text="${goal.status == 'ACTIVE' ? '진행 중' : (goal.status == 'COMPLETED' ? '완료' : '보관')}">진행 중</span>
-						</div>
-					</article>
-				</div>
-			</section>
+          <!-- 목표 생성 / 수정 폼 -->
+          <div
+            class="split"
+            th:classappend="${!goals.isEmpty()} ? 'goal-form-section'"
+          >
+            <section>
+              <!-- 수정 모드 -->
+              <div th:if="${editGoal != null}">
+                <p class="eyebrow green">
+                  <span class="icon icon-spark"></span> GOAL EDIT
+                </p>
+                <h1>목표 수정하기</h1>
+                <p>목표 내용을 변경하고 저장하세요.</p>
+                <p
+                  class="form-error"
+                  th:if="${errorMessage}"
+                  th:text="${errorMessage}"
+                ></p>
+                <form
+                  th:action="@{/goals/{id}(id=${editGoal.id})}"
+                  method="post"
+                  class="goal-form"
+                >
+                  <label
+                    >꿈의 이름
+                    <input
+                      name="title"
+                      required
+                      maxlength="120"
+                      th:value="${editGoal.title}"
+                      placeholder="예: 한 달 안에 전공 서적 3권 완독하기"
+                    />
+                  </label>
+                  <div class="form-row">
+                    <label
+                      >카테고리
+                      <select name="category">
+                        <option
+                          value="STUDY"
+                          th:selected="${editGoal.category == 'STUDY'}"
+                        >
+                          학업 (Study)
+                        </option>
+                        <option
+                          value="EDUCATION"
+                          th:selected="${editGoal.category == 'EDUCATION'}"
+                        >
+                          교육 (Education)
+                        </option>
+                        <option
+                          value="HEALTH"
+                          th:selected="${editGoal.category == 'HEALTH'}"
+                        >
+                          건강 (Health)
+                        </option>
+                        <option
+                          value="FITNESS"
+                          th:selected="${editGoal.category == 'FITNESS'}"
+                        >
+                          운동 (Fitness)
+                        </option>
+                        <option
+                          value="HOBBY"
+                          th:selected="${editGoal.category == 'HOBBY'}"
+                        >
+                          취미 (Hobby)
+                        </option>
+                        <option
+                          value="CAREER"
+                          th:selected="${editGoal.category == 'CAREER'}"
+                        >
+                          커리어 (Career)
+                        </option>
+                      </select>
+                    </label>
+                    <label
+                      >목표 달성일
+                      <input
+                        name="targetDate"
+                        type="text"
+                        readonly
+                        th:attr="data-date=${editGoal.targetDate}"
+                        placeholder="날짜를 선택해주세요"
+                      />
+                    </label>
+                  </div>
+                  <label
+                    >상세 기록
+                    <textarea
+                      name="description"
+                      placeholder="목표를 이루기 위한 전략을 적어보세요."
+                      th:text="${editGoal.description}"
+                    ></textarea>
+                  </label>
+                  <div>
+                    <label class="routine-section-label"
+                      >루틴 설정
+                      <small class="routine-section-hint"
+                        >이 목표를 달성하기 위해 반복할 행동을 추가하세요</small
+                      >
+                    </label>
+                    <div class="routine-tag-list" id="routineListEdit">
+                      <div
+                        th:each="r : ${editGoalRoutines}"
+                        class="routine-tag"
+                      >
+                        <span th:text="${r.title}"></span>
+                        <span
+                          class="routine-freq-badge"
+                          th:text="${r.frequency == 'EVERY_OTHER' ? '격일' : (r.frequency == 'WEEKLY_3' ? '주3회' : (r.frequency == 'FOCUS' ? '집중' : '매일'))}"
+                          >매일</span
+                        >
+                        <input
+                          type="hidden"
+                          name="routineNames"
+                          th:value="${r.title}"
+                        />
+                        <input
+                          type="hidden"
+                          name="routineFreqs"
+                          th:value="${r.frequency}"
+                        />
+                        <button
+                          type="button"
+                          class="routine-tag-remove"
+                          onclick="removeRoutine(this)"
+                          aria-label="삭제"
+                        >
+                          ×
+                        </button>
+                      </div>
+                      <span
+                        class="routine-tag-placeholder"
+                        th:if="${editGoalRoutines.isEmpty()}"
+                        >아직 추가된 루틴이 없어요</span
+                      >
+                    </div>
+                    <div class="routine-add-row">
+                      <input
+                        type="text"
+                        id="newRoutineInputEdit"
+                        placeholder="예: 매일 30분 독서"
+                        maxlength="100"
+                        autocomplete="off"
+                      />
+                      <select
+                        id="newRoutineFreqEdit"
+                        class="routine-freq-select"
+                      >
+                        <option value="DAILY">매일</option>
+                        <option value="EVERY_OTHER">격일</option>
+                        <option value="WEEKLY_3">주 3회</option>
+                        <option value="FOCUS">집중할 때</option>
+                      </select>
+                      <button
+                        type="button"
+                        class="button outline btn-sm"
+                        onclick="addRoutine('edit')"
+                      >
+                        + 추가
+                      </button>
+                    </div>
+                  </div>
+                  <div class="form-actions">
+                    <button class="button primary" type="submit">
+                      수정 저장하기
+                    </button>
+                    <a class="button outline" href="/goals">취소</a>
+                  </div>
+                </form>
+              </div>
 
-			<!-- 목표 생성 / 수정 폼 -->
-			<div class="split" th:classappend="${!goals.isEmpty()} ? 'goal-form-section'">
-				<section>
-					<!-- 수정 모드 -->
-					<div th:if="${editGoal != null}">
-						<p class="eyebrow green"><span class="icon icon-spark"></span> GOAL EDIT</p>
-						<h1>목표 수정하기</h1>
-						<p>목표 내용을 변경하고 저장하세요.</p>
-						<p class="form-error" th:if="${errorMessage}" th:text="${errorMessage}"></p>
-						<form th:action="@{/goals/{id}(id=${editGoal.id})}" method="post" class="goal-form">
-							<label>꿈의 이름
-								<input name="title" required maxlength="120"
-									th:value="${editGoal.title}" placeholder="예: 한 달 안에 전공 서적 3권 완독하기">
-							</label>
-							<div class="form-row">
-								<label>카테고리
-									<select name="category">
-										<option value="STUDY"  th:selected="${editGoal.category == 'STUDY'}">학업 (Study)</option>
-										<option value="HEALTH" th:selected="${editGoal.category == 'HEALTH'}">운동 (Health)</option>
-										<option value="HOBBY"  th:selected="${editGoal.category == 'HOBBY'}">취미 (Hobby)</option>
-										<option value="CAREER" th:selected="${editGoal.category == 'CAREER'}">커리어 (Career)</option>
-									</select>
-								</label>
-								<label>목표 달성일
-									<input name="targetDate" type="text" readonly
-										th:attr="data-date=${editGoal.targetDate}"
-										placeholder="날짜를 선택해주세요">
-								</label>
-							</div>
-							<label>상세 기록
-								<textarea name="description" placeholder="목표를 이루기 위한 전략을 적어보세요."
-									th:text="${editGoal.description}"></textarea>
-							</label>
-							<div>
-								<label class="routine-section-label">루틴 설정
-									<small class="routine-section-hint">이 목표를 달성하기 위해 반복할 행동을 추가하세요</small>
-								</label>
-								<div class="routine-tag-list" id="routineListEdit">
-									<div th:each="r : ${editGoalRoutines}" class="routine-tag">
-										<span th:text="${r.title}"></span>
-										<input type="hidden" name="routineNames" th:value="${r.title}">
-										<button type="button" class="routine-tag-remove" onclick="removeRoutine(this)" aria-label="삭제">×</button>
-									</div>
-									<span class="routine-tag-placeholder" th:if="${editGoalRoutines.isEmpty()}">아직 추가된 루틴이 없어요</span>
-								</div>
-								<div class="routine-add-row">
-									<input type="text" id="newRoutineInputEdit" placeholder="예: 매일 30분 독서" maxlength="100" autocomplete="off">
-									<button type="button" class="button outline btn-sm" onclick="addRoutine('edit')">+ 추가</button>
-								</div>
-							</div>
-							<div class="form-actions">
-								<button class="button primary" type="submit">수정 저장하기</button>
-								<a class="button outline" href="/goals">취소</a>
-							</div>
-						</form>
-					</div>
+              <!-- 생성 모드 -->
+              <div th:if="${editGoal == null}">
+                <p class="eyebrow green">
+                  <span class="icon icon-spark"></span> COSMIC GOAL SETTING
+                </p>
+                <h1
+                  th:text="${goals.isEmpty() ? '새로운 꿈 정의하기' : '새 목표 추가하기'}"
+                >
+                  새로운 꿈 정의하기
+                </h1>
+                <p>
+                  당신의 목표를 은하계의 빛나는 별로 만들어보세요. 구체적인
+                  계획이 꿈을 현실의 궤도로 이끌어줄 거예요.
+                </p>
+                <p
+                  class="form-error"
+                  th:if="${errorMessage}"
+                  th:text="${errorMessage}"
+                ></p>
+                <form class="goal-form" action="/goals" method="post">
+                  <label
+                    >꿈의 이름
+                    <input
+                      name="title"
+                      required
+                      maxlength="120"
+                      placeholder="예: 한 달 안에 전공 서적 3권 완독하기"
+                    />
+                  </label>
+                  <div class="form-row">
+                    <label
+                      >카테고리
+                      <select name="category">
+                        <option value="STUDY">학업 (Study)</option>
+                        <option value="EDUCATION">교육 (Education)</option>
+                        <option value="HEALTH">건강 (Health)</option>
+                        <option value="FITNESS">운동 (Fitness)</option>
+                        <option value="HOBBY">취미 (Hobby)</option>
+                        <option value="CAREER">커리어 (Career)</option>
+                      </select>
+                    </label>
+                    <label
+                      >목표 달성일
+                      <input
+                        name="targetDate"
+                        type="text"
+                        readonly
+                        placeholder="날짜를 선택해주세요"
+                      />
+                    </label>
+                  </div>
+                  <label
+                    >상세 기록
+                    <textarea
+                      name="description"
+                      placeholder="목표를 이루기 위한 전략을 적어보세요."
+                    ></textarea>
+                  </label>
+                  <div>
+                    <label class="routine-section-label"
+                      >루틴 설정
+                      <small class="routine-section-hint"
+                        >이 목표를 달성하기 위해 반복할 행동을 추가하세요</small
+                      >
+                    </label>
+                    <div class="routine-tag-list" id="routineListCreate">
+                      <span class="routine-tag-placeholder"
+                        >아직 추가된 루틴이 없어요</span
+                      >
+                    </div>
+                    <div class="routine-add-row">
+                      <input
+                        type="text"
+                        id="newRoutineInputCreate"
+                        placeholder="예: 매일 30분 독서"
+                        maxlength="100"
+                        autocomplete="off"
+                      />
+                      <select
+                        id="newRoutineFreqCreate"
+                        class="routine-freq-select"
+                      >
+                        <option value="DAILY">매일</option>
+                        <option value="EVERY_OTHER">격일</option>
+                        <option value="WEEKLY_3">주 3회</option>
+                        <option value="FOCUS">집중할 때</option>
+                      </select>
+                      <button
+                        type="button"
+                        class="button outline btn-sm"
+                        onclick="addRoutine('create')"
+                      >
+                        + 추가
+                      </button>
+                    </div>
+                  </div>
+                  <div class="form-actions">
+                    <button class="button primary" type="submit">
+                      꿈 발사하기
+                    </button>
+                    <a class="button outline" href="/dashboard">취소</a>
+                  </div>
+                </form>
+              </div>
+            </section>
+            <aside class="right-stack">
+              <article class="tip-card">
+                <h2>작은 것부터 시작해요</h2>
+                <p>
+                  큰 목표는 작은 행성들로 나누어 보세요. 하나씩 정복하다 보면
+                  어느새 은하계가 완성될 거예요.
+                </p>
+              </article>
+              <article class="image-card">
+                <div></div>
+                <p>WEEKLY INSPIRATION</p>
+                <strong
+                  >"별에 닿고 싶다면, 먼저 손을 뻗는 법을 배워야 한다."</strong
+                >
+              </article>
+            </aside>
+          </div>
+        </main>
+      </div>
+      <div th:replace="~{fragments :: footer}"></div>
+    </div>
 
-					<!-- 생성 모드 -->
-					<div th:if="${editGoal == null}">
-						<p class="eyebrow green"><span class="icon icon-spark"></span> COSMIC GOAL SETTING</p>
-						<h1 th:text="${goals.isEmpty() ? '새로운 꿈 정의하기' : '새 목표 추가하기'}">새로운 꿈 정의하기</h1>
-						<p>당신의 목표를 은하계의 빛나는 별로 만들어보세요. 구체적인 계획이 꿈을 현실의 궤도로 이끌어줄 거예요.</p>
-						<p class="form-error" th:if="${errorMessage}" th:text="${errorMessage}"></p>
-						<form class="goal-form" action="/goals" method="post">
-							<label>꿈의 이름
-								<input name="title" required maxlength="120" placeholder="예: 한 달 안에 전공 서적 3권 완독하기">
-							</label>
-							<div class="form-row">
-								<label>카테고리
-									<select name="category">
-										<option value="STUDY">학업 (Study)</option>
-										<option value="HEALTH">운동 (Health)</option>
-										<option value="HOBBY">취미 (Hobby)</option>
-										<option value="CAREER">커리어 (Career)</option>
-									</select>
-								</label>
-								<label>목표 달성일
-									<input name="targetDate" type="text" readonly placeholder="날짜를 선택해주세요">
-								</label>
-							</div>
-							<label>상세 기록
-								<textarea name="description" placeholder="목표를 이루기 위한 전략을 적어보세요."></textarea>
-							</label>
-							<div>
-								<label class="routine-section-label">루틴 설정
-									<small class="routine-section-hint">이 목표를 달성하기 위해 반복할 행동을 추가하세요</small>
-								</label>
-								<div class="routine-tag-list" id="routineListCreate">
-									<span class="routine-tag-placeholder">아직 추가된 루틴이 없어요</span>
-								</div>
-								<div class="routine-add-row">
-									<input type="text" id="newRoutineInputCreate" placeholder="예: 매일 30분 독서" maxlength="100" autocomplete="off">
-									<button type="button" class="button outline btn-sm" onclick="addRoutine('create')">+ 추가</button>
-								</div>
-							</div>
-							<div class="form-actions">
-								<button class="button primary" type="submit">꿈 발사하기</button>
-								<a class="button outline" href="/dashboard">취소</a>
-							</div>
-						</form>
-					</div>
-				</section>
-				<aside class="right-stack">
-					<article class="tip-card"><h2>작은 것부터 시작해요</h2><p>큰 목표는 작은 행성들로 나누어 보세요. 하나씩 정복하다 보면 어느새 은하계가 완성될 거예요.</p></article>
-					<article class="image-card"><div></div><p>WEEKLY INSPIRATION</p><strong>"별에 닿고 싶다면, 먼저 손을 뻗는 법을 배워야 한다."</strong></article>
-				</aside>
-			</div>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ko.js"></script>
+    <script>
+      document
+        .querySelectorAll('input[name="targetDate"]')
+        .forEach(function (el) {
+          flatpickr(el, {
+            locale: "ko",
+            dateFormat: "Y-m-d",
+            altInput: true,
+            altFormat: "Y년 m월 d일",
+            defaultDate: el.dataset.date || null,
+            disableMobile: true,
+          });
+        });
 
-		</main>
-	</div>
-	<div th:replace="~{fragments :: footer}"></div>
-</div>
+      function updatePlaceholder(listId) {
+        var list = document.getElementById(listId);
+        var ph = list.querySelector(".routine-tag-placeholder");
+        var tags = list.querySelectorAll(".routine-tag");
+        if (ph) ph.style.display = tags.length > 0 ? "none" : "";
+      }
 
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ko.js"></script>
-<script>
-  document.querySelectorAll('input[name="targetDate"]').forEach(function(el) {
-    flatpickr(el, {
-      locale: "ko",
-      dateFormat: "Y-m-d",
-      altInput: true,
-      altFormat: "Y년 m월 d일",
-      defaultDate: el.dataset.date || null,
-      disableMobile: true
-    });
-  });
+      var freqLabels = {
+        DAILY: "매일",
+        EVERY_OTHER: "격일",
+        WEEKLY_3: "주3회",
+        FOCUS: "집중",
+      };
 
-  function updatePlaceholder(listId) {
-    var list = document.getElementById(listId);
-    var ph = list.querySelector('.routine-tag-placeholder');
-    var tags = list.querySelectorAll('.routine-tag');
-    if (ph) ph.style.display = tags.length > 0 ? 'none' : '';
-  }
+      function addRoutine(mode) {
+        var inputId =
+          mode === "edit" ? "newRoutineInputEdit" : "newRoutineInputCreate";
+        var freqId =
+          mode === "edit" ? "newRoutineFreqEdit" : "newRoutineFreqCreate";
+        var listId = mode === "edit" ? "routineListEdit" : "routineListCreate";
+        var input = document.getElementById(inputId);
+        var freqSel = document.getElementById(freqId);
+        var name = input.value.trim();
+        if (!name) {
+          input.focus();
+          return;
+        }
+        var freq = freqSel ? freqSel.value : "DAILY";
+        var label = freqLabels[freq] || "매일";
 
-  function addRoutine(mode) {
-    var inputId = mode === 'edit' ? 'newRoutineInputEdit' : 'newRoutineInputCreate';
-    var listId  = mode === 'edit' ? 'routineListEdit'      : 'routineListCreate';
-    var input = document.getElementById(inputId);
-    var name = input.value.trim();
-    if (!name) { input.focus(); return; }
+        var list = document.getElementById(listId);
+        var div = document.createElement("div");
+        div.className = "routine-tag";
+        div.innerHTML =
+          "<span>" +
+          escHtml(name) +
+          "</span>" +
+          '<span class="routine-freq-badge">' +
+          label +
+          "</span>" +
+          '<input type="hidden" name="routineNames" value="' +
+          escHtml(name) +
+          '">' +
+          '<input type="hidden" name="routineFreqs" value="' +
+          escHtml(freq) +
+          '">' +
+          '<button type="button" class="routine-tag-remove" onclick="removeRoutine(this)" aria-label="삭제">×</button>';
+        list.appendChild(div);
+        input.value = "";
+        input.focus();
+        updatePlaceholder(listId);
+      }
 
-    var list = document.getElementById(listId);
-    var div = document.createElement('div');
-    div.className = 'routine-tag';
-    div.innerHTML =
-      '<span>' + escHtml(name) + '</span>' +
-      '<input type="hidden" name="routineNames" value="' + escHtml(name) + '">' +
-      '<button type="button" class="routine-tag-remove" onclick="removeRoutine(this)" aria-label="삭제">×</button>';
-    list.appendChild(div);
-    input.value = '';
-    input.focus();
-    updatePlaceholder(listId);
-  }
+      function removeRoutine(btn) {
+        var tag = btn.closest(".routine-tag");
+        var list = tag.parentElement;
+        tag.remove();
+        updatePlaceholder(list.id);
+      }
 
-  function removeRoutine(btn) {
-    var tag = btn.closest('.routine-tag');
-    var list = tag.parentElement;
-    tag.remove();
-    updatePlaceholder(list.id);
-  }
+      function escHtml(str) {
+        return str
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
 
-  function escHtml(str) {
-    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
-
-  ['newRoutineInputEdit', 'newRoutineInputCreate'].forEach(function(id) {
-    var el = document.getElementById(id);
-    if (el) el.addEventListener('keydown', function(e) {
-      if (e.key === 'Enter') { e.preventDefault(); addRoutine(id.includes('Edit') ? 'edit' : 'create'); }
-    });
-  });
-</script>
-</body>
+      ["newRoutineInputEdit", "newRoutineInputCreate"].forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el)
+          el.addEventListener("keydown", function (e) {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              addRoutine(id.includes("Edit") ? "edit" : "create");
+            }
+          });
+      });
+      updatePlaceholder("routineListCreate");
+    </script>
+  </body>
 </html>
