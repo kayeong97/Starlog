@@ -15,6 +15,7 @@
 | MM/DD/YYYY    |      0.00 | Type brief description here | Author name |
 | 03/20/2026    |      0.01 | first document              | 김가영      |
 | 04/30/2026    |      0.02 | 기능 수정                   | 김가영      |
+| 06/04/2026    |      0.03 | 코드 수정에 따른 문서 수정    | 김가영     |
 
 ## Contents
 
