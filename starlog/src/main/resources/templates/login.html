@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>로그인 | Starlog</title>
+    <link rel="stylesheet" href="/css/starlog.css" />
+  </head>
+  <body>
+    <main class="auth-page">
+      <div class="orb orb-left"></div>
+      <div class="orb orb-right"></div>
+      <section class="auth-card compact">
+        <div class="auth-icon"><span class="icon icon-spark"></span></div>
+        <h1>로그인</h1>
+        <p
+          class="form-error"
+          th:if="${errorMessage}"
+          th:text="${errorMessage}"
+        ></p>
+        <form action="/login" method="post" class="auth-form">
+          <label
+            >아이디<input
+              name="username"
+              autocomplete="username"
+              required
+              placeholder="아이디를 입력해주세요"
+          /></label>
+          <label
+            >비밀번호<input
+              name="password"
+              type="password"
+              autocomplete="current-password"
+              required
+              placeholder="비밀번호를 입력해주세요"
+          /></label>
+          <button class="button primary" type="submit">
+            로그인 <span class="icon icon-arrow"></span>
+          </button>
+        </form>
+        <p class="auth-link">
+          Starlog가 처음이신가요? <a href="/signup">회원가입</a>
+        </p>
+      </section>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Starlog</title>
+    <link rel="stylesheet" href="/css/starlog.css" />
+  </head>
+  <body>
+    <div class="app-shell landing">
+      <div th:replace="~{fragments :: topbar}"></div>
+      <main class="landing-main">
+        <section class="hero">
+          <p class="eyebrow">✦ NEW VERSION 2.0 LAUNCH</p>
+          <h1>꿈을 <span>별자리로</span> 만드는 여정</h1>
+          <p>
+            매일의 작은 습관이 밤하늘의 빛나는 별이 됩니다.<br />Starlog와 함께
+            당신만의 특별한 은하계를 기록하고 완성해보세요.
+          </p>
+          <div class="hero-actions">
+            <a class="button primary" href="/login">로그인하기</a>
+            <a class="button outline" href="/signup">회원가입</a>
+          </div>
+        </section>
+
+        <section class="habit-strip" aria-label="today goals">
+          <article class="habit-card">
+            <div><span>오늘의 독서</span><strong>★</strong></div>
+            <meter min="0" max="100" value="75"></meter>
+            <p>75% 완료</p>
+          </article>
+          <article class="habit-card">
+            <div><span>물 2L 마시기</span><strong>☆</strong></div>
+            <meter min="0" max="100" value="50"></meter>
+            <p>50% 완료</p>
+          </article>
+          <article class="habit-card">
+            <div><span>영어 회화</span><strong>★</strong></div>
+            <meter min="0" max="100" value="100"></meter>
+            <p>100% 완료</p>
+          </article>
+        </section>
+
+        <section class="callout">
+          <h2>오늘 밤, 당신의 첫 번째<br /><span>별</span>을 쏘아 올리세요.</h2>
+          <p>
+            전 세계 10만 명의 대학생들이 이미 Starlog와 함께 자신만의 은하계를
+            만들고 있습니다.
+          </p>
+        </section>
+      </main>
+      <div th:replace="~{fragments :: footer}"></div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>오늘의 기록 | Starlog</title>
+    <link rel="stylesheet" href="/css/starlog.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <div th:replace="~{fragments :: topbar}"></div>
+      <main class="record-page">
+        <header>
+          <h1>오늘의 기록</h1>
+          <p>오늘 당신의 별에 가까워진 순간을 남겨보세요.</p>
+        </header>
+        <p
+          class="form-error"
+          th:if="${errorMessage}"
+          th:text="${errorMessage}"
+        ></p>
+        <form class="record-grid" action="/record" method="post">
+          <section class="record-card">
+            <h2>오늘은 어떻게 당신의 별에 다가갔나요?</h2>
+            <div class="record-date-row">
+              <label class="date-label"
+                >기록 날짜
+                <input
+                  name="recordDate"
+                  type="date"
+                  th:value="${today}"
+                  id="recordDateInput"
+                />
+              </label>
+            </div>
+            <textarea
+              name="content"
+              required
+              placeholder="나만의 은하계에 남길 오늘의 이야기를 적어주세요..."
+            ></textarea>
+          </section>
+          <section class="mood-card">
+            <h2>오늘의 기분</h2>
+            <div class="mood-grid">
+              <label
+                ><input type="radio" name="mood" value="GREAT" />
+                <span
+                  ><i class="mood-icon great"></i><small>최고예요</small></span
+                ></label
+              >
+              <label
+                ><input type="radio" name="mood" value="GOOD" checked />
+                <span
+                  ><i class="mood-icon good"></i><small>좋아요</small></span
+                ></label
+              >
+              <label
+                ><input type="radio" name="mood" value="NORMAL" />
+                <span
+                  ><i class="mood-icon normal"></i><small>평범해요</small></span
+                ></label
+              >
+              <label
+                ><input type="radio" name="mood" value="SAD" />
+                <span
+                  ><i class="mood-icon sad"></i><small>흐려요</small></span
+                ></label
+              >
+              <label
+                ><input type="radio" name="mood" value="UPSET" />
+                <span
+                  ><i class="mood-icon upset"></i><small>속상해요</small></span
+                ></label
+              >
+              <label
+                ><input type="radio" name="mood" value="COMPLEX" />
+                <span
+                  ><i class="mood-icon complex"></i
+                  ><small>복잡해요</small></span
+                ></label
+              >
+            </div>
+          </section>
+
+          <!-- 루틴 체크 -->
+          <section class="routine-card" th:if="${!routines.isEmpty()}">
+            <h2>데일리 루틴 체크</h2>
+            <label th:each="routine : ${routines}">
+              <span
+                ><span class="icon icon-star"></span>
+                <span th:text="${routine.title}">루틴</span></span
+              >
+              <input type="checkbox" name="routineIds" th:value="${routine.id}" />
+            </label>
+          </section>
+          <section
+            class="routine-card routine-empty"
+            th:if="${routines.isEmpty()}"
+          >
+            <h2>데일리 루틴 체크</h2>
+            <p class="routine-hint">
+              아직 등록된 루틴이 없어요.<br />목표 설정 화면에서 나만의 루틴을
+              만들어보세요.
+            </p>
+            <a href="/goals" class="button outline routine-link"
+              >목표 설정하러 가기</a
+            >
+          </section>
+
+          <button class="button primary save-record" type="submit">
+            기록 저장하기 <span class="icon icon-arrow"></span>
+          </button>
+        </form>
+      </main>
+      <div th:replace="~{fragments :: footer}"></div>
+    </div>
+  </body>
+</html>
